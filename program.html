@@ -16,6 +16,7 @@
         var PLAYER_WIDTH = 181;
         var PLAYER_HEIGHT = 229
         var GROUND_Y = 540;
+        var PLAYER_Y_ACCELERATION = 1;
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -30,9 +31,9 @@
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
 
-
         var playerX = 50;
         var playerY = 40;
+        var playerYSpeed = 0;
 
         window.addEventListener('load', start);
 
@@ -51,7 +52,14 @@
 
         //UPDAING
         function update() {
+            //gravity for mr. Nano
+            playerY = playerY + playerYSpeed;
+            playerYSpeed = playerYSpeed + PLAYER_Y_ACCELERATION;
 
+            if (playerY > (GROUND_Y - PLAYER_HEIGHT)) {
+                playerY = GROUND_Y - PLAYER_HEIGHT;
+                playerYSpeed = 0;
+            }
         }
 
         //DRAWING
