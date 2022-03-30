@@ -14,9 +14,11 @@
         var CANVAS_WIDTH = 800;
         var CANVAS_HIEGHT = 600;
         var PLAYER_WIDTH = 181;
-        var PLAYER_HEIGHT = 229
+        var PLAYER_HEIGHT = 229;
         var GROUND_Y = 540;
         var PLAYER_Y_ACCELERATION = 1;
+        var PLAYER_JUMP_SPEED = 20;
+        var SPACE_KEYCODE = 32;
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -34,6 +36,11 @@
         var playerX = 50;
         var playerY = 40;
         var playerYSpeed = 0;
+        var spaceKeyIsPressed = false;
+        var playerIsInTheAir = false;
+
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
 
         window.addEventListener('load', start);
 
@@ -49,6 +56,16 @@
         }
 
         //PLAYER INPUT
+        function onKeyDown(event) {
+            if (event.keyCode === SPACE_KEYCODE) {
+                spaceKeyIsPressed = true;
+            }
+        }
+        function onKeyUp(event) {
+            if (event.keyCode === SPACE_KEYCODE) {
+                spaceKeyIsPressed = false;
+            }
+        }
 
         //UPDAING
         function update() {
@@ -56,10 +73,27 @@
             playerY = playerY + playerYSpeed;
             playerYSpeed = playerYSpeed + PLAYER_Y_ACCELERATION;
 
+            //jump for mr Nano.
+            if (spaceKeyIsPressed) {
+                playerYSpeed = -PLAYER_JUMP_SPEED;
+            }
+
             if (playerY > (GROUND_Y - PLAYER_HEIGHT)) {
                 playerY = GROUND_Y - PLAYER_HEIGHT;
                 playerYSpeed = 0;
             }
+
+            if (spaceKeyIsPressed && !playerIsInTheAir) {
+                playerYSpeed = -PLAYER_JUMP_SPEED;
+                playerIsInTheAir = true;
+            }
+
+            (playerY > (GROUND_Y - PLAYER_HEIGHT)); {
+                playerY = GROUND_Y - PLAYER_HEIGHT;
+                playerYSpeed = 0;
+                playerIsInTheAir = false;
+            }
+
         }
 
         //DRAWING
