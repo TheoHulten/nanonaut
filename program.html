@@ -25,7 +25,11 @@
         document.body.appendChild(canvas);
 
         var playerImage = new Image();
-        playerImage.src = 'Nanonaut.png';
+        playerImage.src = 'visuals/Nanonaut.png';
+
+        var backgroundImage = new Image();
+        backgroundImage.src = 'visuals/background.png';
+
 
         var playerX = 50;
         var playerY = 40;
@@ -55,6 +59,9 @@
             //Da sky
             c.fillStyle = 'LightSkyBlue';
             c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
+
+            //Da background
+            c.drawImage(backgroundImage, 0, -210);
 
             //Da ground
             c.fillStyle = 'ForestGreen';
