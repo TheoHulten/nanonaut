@@ -9,22 +9,32 @@
 
 <body>
     <script>
-        var name = 'Nanonauts!';
-        var message = ' I cant belive how good they are';
-        console.log(name + message);
-       /* console.log('Goodbye World!');
-          var value1 = 4;
-          var value2 = 5;
-          var value3 = 1;
-          console.log(value3 + value2 * value1);
-          value3 = 10;
-          console.log(value3 + value2 * value1);
-          console.log(value1 + value2 - value3);
-          var value4 = 5;
-          var value5 = value4 + 1;
-          value4 = 4;
-          console.log(value5);
-          console.log(value4);*/
+        var canvas = document.createElement('canvas')
+        canvas.width = 800;
+        canvas.height = 600;
+        document.body.appendChild(canvas);
+        var c = canvas.getContext('2d');
+        function start() {
+            c.fillStyle = 'blue';
+            c.fillRect(40, 40, 10, 10);
+        }
+        document.body.appendChild(canvas);
+          /*var name = 'Nanonauts!';
+var message = ' I cant belive how good they are';
+console.log(name + message);
+console.log('Goodbye World!');
+var value1 = 4;
+var value2 = 5;
+var value3 = 1;
+console.log(value3 + value2 * value1);
+value3 = 10;
+console.log(value3 + value2 * value1);
+console.log(value1 + value2 - value3);
+var value4 = 5;
+var value5 = value4 + 1;
+value4 = 4;
+console.log(value5);
+console.log(value4);*/
     </script>
 </body>
 
