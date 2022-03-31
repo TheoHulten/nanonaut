@@ -15,13 +15,14 @@
         var CANVAS_HIEGHT = 600;
         var PLAYER_WIDTH = 181;
         var PLAYER_HEIGHT = 229;
+        var ROBOT_WIDTH = 141;
+        var ROBOT_HEIGHT = 139;
         var PLAYER_X_SPEED = 5;
         var GROUND_Y = 540;
         var PLAYER_Y_ACCELERATION = 1;
         var PLAYER_JUMP_SPEED = 20;
         var SPACE_KEYCODE = 32;
         var BACKGROUND_WIDTH = 1000;
-        var PLAYER_NR_FRAMES_PER_ROW = 5;
         var PLAYER_NR_ANIMATION_FRAMES = 7;
         var PLAYER_ANIMATION_SPEED = 3;
         var gameFrameCounter = 0;
@@ -35,6 +36,9 @@
 
         var playerImage = new Image();
         playerImage.src = 'visuals/AnimatedNanonaut.png';
+
+        var robotImage = new Image();
+        robotImage.src = 'visuals/AnimatedRobot.png'
 
         var bush1Image = new Image();
         bush1Image.src = 'visuals/bush1.png';
@@ -82,6 +86,26 @@
             }
             return generateBushData;
         }
+
+        var playerSpriteSheet = {
+            nrFramesPerRow: 5,
+            spriteWidth: PLAYER_WIDTH,
+            spriteHeight: PLAYER_HEIGHT,
+            image: playerImage
+        };
+
+        var robotSpriteSheet = {
+            nrFramesPerRow: 3,
+            spriteWidth: ROBOT_WIDTH,
+            spriteHeight: ROBOT_HEIGHT,
+            image: robotImage
+        };
+
+        var robotData = [{
+            x: 400,
+            y: GROUND_Y - ROBOT_HEIGHT,
+            frameNr: 0
+        }];
 
         //MAIN LOOP
         function mainLoop() {
@@ -167,12 +191,28 @@
                 c.drawImage(bushData[i].image, bushData[i].x - cameraX, GROUND_Y - bushData[i].y - cameraY);
             }
 
+            //Daftpunk
+            for (var i = 0; i < robotData.length; i++) {
+                drawAnimatedSprite(robotData[i].x - cameraX, robotData[i].y - cameraY, robotData[i].frameNr, robotSpriteSheet);
+            }
+
             //drawing mr Nano
-            var playerSpriteSheetRow = Math.floor(playerFrameNr / PLAYER_NR_FRAMES_PER_ROW);
-            var playerSpriteSheetColumn = playerFrameNr % PLAYER_NR_FRAMES_PER_ROW;
-            var playerSpriteSheetX = playerSpriteSheetColumn * PLAYER_WIDTH;
-            var playerSpriteSheetY = playerSpriteSheetRow * PLAYER_HEIGHT;
-            c.drawImage(playerImage, playerSpriteSheetX, playerSpriteSheetY, PLAYER_WIDTH, PLAYER_HEIGHT, playerX - cameraX, playerY - cameraY, PLAYER_WIDTH, PLAYER_HEIGHT)
+            drawAnimatedSprite(playerX - cameraX, playerY - cameraY, playerFrameNr, playerSpriteSheet);
+
+            //spite animator
+            function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
+                var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
+                var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
+                var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
+                var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
+                c.drawImage(
+                    spriteSheet.image,
+                    spriteSheetX, spriteSheetY,
+                    spriteSheet.spriteWidth, spriteSheet.spriteHeight,
+                    screenX, screenY,
+                    spriteSheet.spriteWidth, spriteSheet.spriteHeight
+                );
+            }
         }
 
     </script>
