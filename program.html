@@ -15,10 +15,14 @@
         var CANVAS_HIEGHT = 600;
         var PLAYER_WIDTH = 181;
         var PLAYER_HEIGHT = 229;
+        var PLAYER_X_SPEED = 5;
         var GROUND_Y = 540;
         var PLAYER_Y_ACCELERATION = 1;
         var PLAYER_JUMP_SPEED = 20;
         var SPACE_KEYCODE = 32;
+        var BACKGROUND_WIDTH = 1000;
+        var PLAYER_NR_FRAMES_PER_ROW = 5;
+        var PLAYER_NR_ANIMATION_FRAMES = 7;
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -28,16 +32,19 @@
         document.body.appendChild(canvas);
 
         var playerImage = new Image();
-        playerImage.src = 'visuals/Nanonaut.png';
+        playerImage.src = 'visuals/AnimatedNanonaut.png';
 
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
 
-        var playerX = 50;
-        var playerY = 40;
+        var playerX = CANVAS_WIDTH / 2;
+        var playerY = GROUND_Y - PLAYER_HEIGHT;
         var playerYSpeed = 0;
         var spaceKeyIsPressed = false;
         var playerIsInTheAir = false;
+        var cameraX = 0;
+        var cameraY = 0;
+        var playerFrameNr = 0;
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
@@ -71,15 +78,18 @@
 
         //UPDAING
         function update() {
+            //SPEEED
+            playerX = playerX + PLAYER_X_SPEED;
+            console.log(playerX);
+
             //jump for mr Nano.
             if (spaceKeyIsPressed && !playerIsInTheAir) {
                 playerYSpeed = - PLAYER_JUMP_SPEED;
                 playerIsInTheAir = true;
-                console.log('hello world');
             }
+
             //gravity for mr. Nano
             playerY = playerY + playerYSpeed;
-            console.log('playerY', playerY);
 
             playerYSpeed = playerYSpeed + PLAYER_Y_ACCELERATION;
 
@@ -87,8 +97,16 @@
                 playerY = GROUND_Y - PLAYER_HEIGHT;
                 playerYSpeed = 0;
                 playerIsInTheAir = false;
-                console.log('stop jump', playerY);
             }
+
+            //Update animation
+            playerFrameNr = playerFrameNr + 1;
+            if (playerFrameNr >= PLAYER_NR_ANIMATION_FRAMES) {
+                playerFrameNr = 0;
+            }
+
+            //Update camera
+            cameraX = playerX - 150;
         }
 
         //DRAWING
@@ -98,13 +116,20 @@
             c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
 
             //Da background
-            c.drawImage(backgroundImage, 0, -210);
+            var backgroundX = - (cameraX % BACKGROUND_WIDTH);
+            c.drawImage(backgroundImage, backgroundX, -210);
+            c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210);
 
             //Da ground
             c.fillStyle = 'ForestGreen';
             c.fillRect(0, GROUND_Y - 40, CANVAS_WIDTH, CANVAS_HIEGHT - GROUND_Y + 40);
 
-            c.drawImage(playerImage, playerX, playerY);
+            //drawing mr Nano
+            var playerSpriteSheetRow = Math.floor(playerFrameNr / PLAYER_NR_FRAMES_PER_ROW);
+            var playerSpriteSheetColumn = playerFrameNr % PLAYER_NR_FRAMES_PER_ROW;
+            var playerSpriteSheetX = playerSpriteSheetColumn * PLAYER_WIDTH;
+            var playerSpriteSheetY = playerSpriteSheetRow * PLAYER_HEIGHT;
+            c.drawImage(playerImage, playerSpriteSheetX, playerSpriteSheetY, PLAYER_WIDTH, PLAYER_HEIGHT, playerX - cameraX, playerY - cameraY, PLAYER_WIDTH, PLAYER_HEIGHT)
         }
 
     </script>
