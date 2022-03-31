@@ -36,6 +36,11 @@
         var playerImage = new Image();
         playerImage.src = 'visuals/AnimatedNanonaut.png';
 
+        var bush1Image = new Image();
+        bush1Image.src = 'visuals/bush1.png';
+        var bush2Image = new Image();
+        bush2Image.src = 'visuals/bush2.png';
+
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
 
@@ -47,6 +52,7 @@
         var cameraX = 0;
         var cameraY = 0;
         var playerFrameNr = 0;
+        var bushData = generateBushes();
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
@@ -55,6 +61,21 @@
 
         function start() {
             window.requestAnimationFrame(mainLoop);
+        }
+
+        //This dosent work yet
+        function generateBushes() {
+            var generateBushData = [];
+            var bushX = 0;
+            for (var i = 0; i < 10; i++) {
+                generateBushData.push({
+                    x: bushX,
+                    y: 80 + Math.random() * 20,
+                    image: bush1Image
+                });
+                bushX += 150 + Math.random() * 200;
+            }
+            return generateBushData;
         }
 
         //MAIN LOOP
@@ -112,6 +133,13 @@
 
             //Update camera
             cameraX = playerX - 150;
+
+            //teleporting da bushes
+            for (var i = 0; i < bushData.length; i++) {
+                if ((bushData[i].x - cameraX) < - CANVAS_WIDTH) {
+                    bushData[i].x += (2 * CANVAS_WIDTH) + 150;
+                }
+            }
         }
 
         //DRAWING
@@ -128,6 +156,11 @@
             //Da ground
             c.fillStyle = 'ForestGreen';
             c.fillRect(0, GROUND_Y - 40, CANVAS_WIDTH, CANVAS_HIEGHT - GROUND_Y + 40);
+
+            //Da bush
+            for (var i = 0; i < bushData.length; i++) {
+                c.drawImage(bushData[i].image, bushData[i].x - cameraX, GROUND_Y - bushData[i].y - cameraY);
+            }
 
             //drawing mr Nano
             var playerSpriteSheetRow = Math.floor(playerFrameNr / PLAYER_NR_FRAMES_PER_ROW);
