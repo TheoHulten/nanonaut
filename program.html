@@ -23,6 +23,8 @@
         var BACKGROUND_WIDTH = 1000;
         var PLAYER_NR_FRAMES_PER_ROW = 5;
         var PLAYER_NR_ANIMATION_FRAMES = 7;
+        var PLAYER_ANIMATION_SPEED = 3;
+        var gameFrameCounter = 0;
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -78,9 +80,10 @@
 
         //UPDAING
         function update() {
+            gameFrameCounter = gameFrameCounter + 1;
+
             //SPEEED
             playerX = playerX + PLAYER_X_SPEED;
-            console.log(playerX);
 
             //jump for mr Nano.
             if (spaceKeyIsPressed && !playerIsInTheAir) {
@@ -100,9 +103,11 @@
             }
 
             //Update animation
-            playerFrameNr = playerFrameNr + 1;
-            if (playerFrameNr >= PLAYER_NR_ANIMATION_FRAMES) {
-                playerFrameNr = 0;
+            if ((gameFrameCounter % PLAYER_ANIMATION_SPEED) === 0) {
+                playerFrameNr = playerFrameNr + 1;
+                if (playerFrameNr >= PLAYER_NR_ANIMATION_FRAMES) {
+                    playerFrameNr = 0;
+                }
             }
 
             //Update camera
