@@ -13,19 +13,24 @@
         //CONSTANTS
         var CANVAS_WIDTH = 800;
         var CANVAS_HIEGHT = 600;
+
         var PLAYER_WIDTH = 181;
         var PLAYER_HEIGHT = 229;
-        var ROBOT_WIDTH = 141;
-        var ROBOT_HEIGHT = 139;
         var PLAYER_X_SPEED = 5;
-        var GROUND_Y = 540;
         var PLAYER_Y_ACCELERATION = 1;
         var PLAYER_JUMP_SPEED = 20;
-        var SPACE_KEYCODE = 32;
-        var BACKGROUND_WIDTH = 1000;
         var PLAYER_NR_ANIMATION_FRAMES = 7;
         var PLAYER_ANIMATION_SPEED = 3;
+
+        var ROBOT_WIDTH = 141;
+        var ROBOT_HEIGHT = 139;
+        var ROBOT_NR_ANIMATION_FRAMES = 9;
+        var ROBOT_ANIMATION_SPEED = 5;
+
+        var SPACE_KEYCODE = 32;
+        var BACKGROUND_WIDTH = 1000;
         var gameFrameCounter = 0;
+        var GROUND_Y = 540;
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -167,6 +172,22 @@
             for (var i = 0; i < bushData.length; i++) {
                 if ((bushData[i].x - cameraX) < - CANVAS_WIDTH) {
                     bushData[i].x += (2 * CANVAS_WIDTH) + 150;
+                }
+
+                //Robot command
+                updateRobots();
+            }
+        }
+
+        //robot robatics
+        function updateRobots() {
+            //moving and animating robots
+            for (var i = 0; i < robotData.length; i++) {
+                if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0) {
+                    robotData[i].frameNr = robotData[i].frameNr + 1;
+                    if (robotData[i].frameNr >= ROBOT_NR_ANIMATION_FRAMES) {
+                        robotData.frameNr = 0;
+                    }
                 }
             }
         }
