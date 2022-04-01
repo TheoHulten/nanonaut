@@ -51,6 +51,12 @@
             spriteHeight: PLAYER_HEIGHT,
             image: playerImage
         };
+        var playerCollisionRectangle = {
+            xOffset: 60,
+            yOffset: 20,
+            width: 50,
+            height: 200
+        };
 
         var robotImage = new Image();
         robotImage.src = 'visuals/AnimatedRobot.png'
@@ -61,6 +67,12 @@
             image: robotImage
         };
         var robotData = [];
+        var robotCollisionRectangle = {
+            xOffset: 50,
+            yOffset: 20,
+            width: 50,
+            height: 100
+        }
 
         var bush1Image = new Image();
         bush1Image.src = 'visuals/bush1.png';
@@ -180,6 +192,18 @@
         function updateRobots() {
             //moving and animating robots
             for (var i = 0; i < robotData.length; i++) {
+                if (doesPlayerOverlapRobot(
+                    playerX + playerCollisionRectangle.xOffset,
+                    playerY + playerCollisionRectangle.yOffset,
+                    playerCollisionRectangle.width,
+                    playerCollisionRectangle.height,
+                    robotData[i].x + robotCollisionRectangle.xOffset,
+                    robotData[i].y + robotCollisionRectangle.yOffset,
+                    robotCollisionRectangle.width,
+                    robotCollisionRectangle.heigth
+                )) {
+                    console.log('OUCHI!');
+                }
                 robotData[i].x -= ROBOT_X_SPEED;
                 if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0) {
                     robotData[i].frameNr = robotData[i].frameNr + 1;
@@ -214,25 +238,25 @@
             }
         }
 
-        function doesPlayerOverlapRobotAlongAxis(playerNearX, playerFarX, robotNearX, robotFarX) {
+        function doesPlayerOverlapRobotAlongOneAxis(playerNearX, playerFarX, robotNearX, robotFarX) {
             var playerOverlapsNearRobotEdge = (playerFarX >= robotNearX) && (playerFarX <= robotFarX);
             var playerOverlapsFarRobotEdge = (playerNearX >= robotNearX) && (playerNearX <= robotFarX);
             var playerOverlapsEntireRobot = (playerNearX <= robotNearX) && (playerFarX >= robotFarX);
             return playerOverlapsNearRobotEdge || playerOverlapsFarRobotEdge || playerOverlapsEntireRobot;
         }
         function doesPlayerOverlapRobot(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT, robotX, robotY, ROBOT_WIDTH, ROBOT_HEIGHT) {
-            var PlayerOverlapsRobotOnXAxis = doesPlayerOverlapRobotAlongOneAxis(
+            var playerOverlapsRobotOnXAxis = doesPlayerOverlapRobotAlongOneAxis(
                 playerX,
                 playerX + PLAYER_WIDTH,
                 robotX + ROBOT_WIDTH,
             );
-            var PlayerOverlapsRobotOnYAxis = doesPlayerOverlapRobotAlongOneAxis(
+            var playerOverlapsRobotOnYAxis = doesPlayerOverlapRobotAlongOneAxis(
                 playerY,
                 playerY + PLAYER_HEIGHT,
                 robotY,
                 robotY + ROBOT_HEIGHT
             );
-            return PlayerOverlapsRobotOnXAxis && PlayerOverlapsRobotOnYAxis;
+            return playerOverlapsRobotOnXAxis && playerOverlapsRobotOnYAxis;
         }
 
         //DRAWING
