@@ -26,6 +26,10 @@
         var ROBOT_HEIGHT = 139;
         var ROBOT_NR_ANIMATION_FRAMES = 9;
         var ROBOT_ANIMATION_SPEED = 5;
+        var ROBOT_X_SPEED = 4;
+        var MIN_DISTANCE_BETWEEN_ROBOTS = 400;
+        var MAX_DISTANCE_BETWEEN_ROBOTS = 1200;
+        var MAX_ACTIVE_ROBOTS = 3;
 
         var SPACE_KEYCODE = 32;
         var BACKGROUND_WIDTH = 1000;
@@ -41,9 +45,22 @@
 
         var playerImage = new Image();
         playerImage.src = 'visuals/AnimatedNanonaut.png';
+        var playerSpriteSheet = {
+            nrFramesPerRow: 5,
+            spriteWidth: PLAYER_WIDTH,
+            spriteHeight: PLAYER_HEIGHT,
+            image: playerImage
+        };
 
         var robotImage = new Image();
         robotImage.src = 'visuals/AnimatedRobot.png'
+        var robotSpriteSheet = {
+            nrFramesPerRow: 3,
+            spriteWidth: ROBOT_WIDTH,
+            spriteHeight: ROBOT_HEIGHT,
+            image: robotImage
+        };
+        var robotData = [];
 
         var bush1Image = new Image();
         bush1Image.src = 'visuals/bush1.png';
@@ -91,26 +108,6 @@
             }
             return generateBushData;
         }
-
-        var playerSpriteSheet = {
-            nrFramesPerRow: 5,
-            spriteWidth: PLAYER_WIDTH,
-            spriteHeight: PLAYER_HEIGHT,
-            image: playerImage
-        };
-
-        var robotSpriteSheet = {
-            nrFramesPerRow: 3,
-            spriteWidth: ROBOT_WIDTH,
-            spriteHeight: ROBOT_HEIGHT,
-            image: robotImage
-        };
-
-        var robotData = [{
-            x: 400,
-            y: GROUND_Y - ROBOT_HEIGHT,
-            frameNr: 0
-        }];
 
         //MAIN LOOP
         function mainLoop() {
@@ -183,13 +180,59 @@
         function updateRobots() {
             //moving and animating robots
             for (var i = 0; i < robotData.length; i++) {
+                robotData[i].x -= ROBOT_X_SPEED;
                 if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0) {
                     robotData[i].frameNr = robotData[i].frameNr + 1;
                     if (robotData[i].frameNr >= ROBOT_NR_ANIMATION_FRAMES) {
-                        robotData.frameNr = 0;
+                        robotData[i].frameNr = 0;
                     }
                 }
             }
+            //remove robots off-screen
+            var robotIndex = 0;
+            while (robotIndex < robotData.length) {
+                if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH) {
+                    robotData.splice(robotIndex, 1);
+                    console.log('I removed a robot!');
+                } else {
+                    robotIndex += 1;
+                }
+            }
+
+            if (robotData.length < MAX_ACTIVE_ROBOTS) {
+                var lastRobotX = CANVAS_WIDTH;
+                var lastRobotX = 0;
+                if (robotData.length > 0) {
+                    lastRobotX = robotData[robotData.length - 1].x;
+                }
+                var newRobotX = lastRobotX + MIN_DISTANCE_BETWEEN_ROBOTS + Math.random() * (MAX_DISTANCE_BETWEEN_ROBOTS - MIN_DISTANCE_BETWEEN_ROBOTS);
+                robotData.push({
+                    x: newRobotX,
+                    y: GROUND_Y - ROBOT_HEIGHT,
+                    frameNr: 0
+                });
+            }
+        }
+
+        function doesPlayerOverlapRobotAlongAxis(playerNearX, playerFarX, robotNearX, robotFarX) {
+            var playerOverlapsNearRobotEdge = (playerFarX >= robotNearX) && (playerFarX <= robotFarX);
+            var playerOverlapsFarRobotEdge = (playerNearX >= robotNearX) && (playerNearX <= robotFarX);
+            var playerOverlapsEntireRobot = (playerNearX <= robotNearX) && (playerFarX >= robotFarX);
+            return playerOverlapsNearRobotEdge || playerOverlapsFarRobotEdge || playerOverlapsEntireRobot;
+        }
+        function doesPlayerOverlapRobot(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT, robotX, robotY, ROBOT_WIDTH, ROBOT_HEIGHT) {
+            var PlayerOverlapsRobotOnXAxis = doesPlayerOverlapRobotAlongOneAxis(
+                playerX,
+                playerX + PLAYER_WIDTH,
+                robotX + ROBOT_WIDTH,
+            );
+            var PlayerOverlapsRobotOnYAxis = doesPlayerOverlapRobotAlongOneAxis(
+                playerY,
+                playerY + PLAYER_HEIGHT,
+                robotY,
+                robotY + ROBOT_HEIGHT
+            );
+            return PlayerOverlapsRobotOnXAxis && PlayerOverlapsRobotOnYAxis;
         }
 
         //DRAWING
