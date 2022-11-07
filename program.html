@@ -94,6 +94,8 @@
         bush1Image.src = 'visuals/bush1.png';
         var bush2Image = new Image();
         bush2Image.src = 'visuals/bush2.png';
+        var coin1Image = new Image();
+        coin1Image.src = 'visuals/coin.png';
 
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
@@ -139,18 +141,15 @@
             return generateBushData;
         }
 
-        var coinImage = new Image();
-        coinImage.src = 'visuals/coin.png';
-
         function generateCoin() {
             var generateCoinData = [];
             var coinX = 0;
             while (coinX < (2 * CANVAS_WIDTH)) {
                 var coinImage;
                 if (Math.random() >= 0.5) {
-                    coinImage = coinImage;
+                    coinImage = coin1Image;
                 } else {
-                    coinImage = coinImage;
+                    coinImage = coin1Image;
                 }
                 generateCoinData.push({
                     x: coinX,
@@ -246,7 +245,11 @@
             }
 
             //Update the coins
-            //updateCoins();
+            for (var i = 0; i < coinData.length; i++) {
+                if ((coinData[i].x - cameraX) < - CANVAS_WIDTH) {
+                    coinData[i].x += (2 * CANVAS_WIDTH) + 150;
+                }
+            }
 
             //Check if the game is over
             if (playerHealth <= 0) {
@@ -254,18 +257,6 @@
                 screenshake = false;
             }
         }
-
-        /*function updateCoins() {
-            //update and animate coins
-            for (var i = 0; i < coinData.length; i++) {
-                if ((gameFrameCounter % COIN_ANIMATION_SPEED) === 0) {
-                    coinData[i].frameNr = robotData[i].frameNr + 1;
-                    if (coinData[i].frameNr >= COIN_NR_ANIMATION_FRAMES) {
-                        coinData[i].frameNr = 0;
-                    }
-                }
-            }
-        }*/
 
         //robot robatics
         function updateRobots() {
