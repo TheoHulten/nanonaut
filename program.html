@@ -40,6 +40,14 @@
 
         var PLAYER_MAX_HEALTH = 100;
 
+        var PLAY_GAME_MODE = 0;
+        var GAME_OVER_GAME_MODE = 1;
+
+        /*var COIN_WIDTH = 8;
+        var COIN_HEIGHT = 8;
+        //var COIN_ANIMATION_SPEED = 3;
+        var COIN_NR_ANIMATION_FRAMES = 8;*/
+
         //SETUP
         var canvas = document.createElement('canvas');
         var c = canvas.getContext('2d');
@@ -61,7 +69,10 @@
             width: 50,
             height: 200
         };
+
         var playerHealth = PLAYER_MAX_HEALTH;
+
+        var gameMode = PLAY_GAME_MODE;
 
         var robotImage = new Image();
         robotImage.src = 'visuals/AnimatedRobot.png'
@@ -97,6 +108,7 @@
         var cameraY = 0;
         var playerFrameNr = 0;
         var bushData = generateBushes();
+        var coinData = generateCoin();
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
@@ -127,6 +139,38 @@
             return generateBushData;
         }
 
+        var coinImage = new Image();
+        coinImage.src = 'visuals/coin.png';
+
+        function generateCoin() {
+            var generateCoinData = [];
+            var coinX = 0;
+            while (coinX < (2 * CANVAS_WIDTH)) {
+                var coinImage;
+                if (Math.random() >= 0.5) {
+                    coinImage = coinImage;
+                } else {
+                    coinImage = coinImage;
+                }
+                generateCoinData.push({
+                    x: coinX,
+                    y: 80 + Math.random() * 20,
+                    image: coinImage
+                });
+                coinX += 150 + Math.random() * 200;
+            }
+            return generateCoinData;
+        }
+
+        /*
+        var coinCollisionRectangle = {
+            xOffset: 5,
+            yOffset: 5,
+            width: 10,
+            height: 10,
+        };
+        */
+
         //MAIN LOOP
         function mainLoop() {
             update();
@@ -151,6 +195,9 @@
         //UPDAING
         function update() {
             gameFrameCounter = gameFrameCounter + 1;
+
+            //death
+            if (gameMode != PLAY_GAME_MODE) return;
 
             //SPEEED
             playerX = playerX + PLAYER_X_SPEED;
@@ -195,13 +242,35 @@
             var playerTouchedARobot = updateRobots();
             if (playerTouchedARobot) {
                 screenshake = true;
+                if (playerHealth > 0) playerHealth -= 1;
             }
 
+            //Update the coins
+            //updateCoins();
+
+            //Check if the game is over
+            if (playerHealth <= 0) {
+                gameMode = GAME_OVER_GAME_MODE;
+                screenshake = false;
+            }
         }
+
+        /*function updateCoins() {
+            //update and animate coins
+            for (var i = 0; i < coinData.length; i++) {
+                if ((gameFrameCounter % COIN_ANIMATION_SPEED) === 0) {
+                    coinData[i].frameNr = robotData[i].frameNr + 1;
+                    if (coinData[i].frameNr >= COIN_NR_ANIMATION_FRAMES) {
+                        coinData[i].frameNr = 0;
+                    }
+                }
+            }
+        }*/
 
         //robot robatics
         function updateRobots() {
             //moving and animating robots
+            var playerTouchedARobot = false;
             for (var i = 0; i < robotData.length; i++) {
                 if (doesPlayerOverlapRobot(
                     // x,y for player
@@ -250,7 +319,7 @@
                     frameNr: 0
                 });
             }
-            //return playerTouchedARobot;
+            return playerTouchedARobot;
         }
 
         function doesPlayerOverlapRobotAlongOneAxis(playerNearX, playerFarX, robotNearX, robotFarX) {
@@ -313,20 +382,44 @@
             //drawing mr Nano
             drawAnimatedSprite(playerX - shakenCameraX, playerY - shakenCameraY, playerFrameNr, playerSpriteSheet);
 
-            //spite animator
-            function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
-                var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
-                var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
-                var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
-                var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
-                c.drawImage(
-                    spriteSheet.image,
-                    spriteSheetX, spriteSheetY,
-                    spriteSheet.spriteWidth, spriteSheet.spriteHeight,
-                    screenX, screenY,
-                    spriteSheet.spriteWidth, spriteSheet.spriteHeight
-                );
+            //printing money
+            for (var i = 0; i < coinData.length; i++) {
+                c.drawImage(coinData[i].image, coinData[i].x - shakenCameraX, GROUND_Y - coinData[i].y - shakenCameraY);
             }
+
+            //drawing score
+            var playerDistance = playerX / 1000;
+            c.fillStyle = 'black';
+            c.font = '48px sans-serif';
+            c.fillText(playerDistance.toFixed(0) + 'm', 20, 40);
+
+            //drawing da health bar
+            c.fillStyle = 'red';
+            c.fillRect(400, 10, playerHealth / PLAYER_MAX_HEALTH * 380, 20)
+            c.strokeStyle = 'red';
+            c.strokeRect(400, 10, 380, 20);
+
+            //drawing da GAME OVER
+            if (gameMode == GAME_OVER_GAME_MODE) {
+                c.fillStyle = 'black';
+                c.font = '96px sans-serif';
+                c.fillText('GAME OVER', 120, 300);
+            }
+        }
+
+        //spite animator
+        function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
+            var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
+            var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
+            var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
+            var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
+            c.drawImage(
+                spriteSheet.image,
+                spriteSheetX, spriteSheetY,
+                spriteSheet.spriteWidth, spriteSheet.spriteHeight,
+                screenX, screenY,
+                spriteSheet.spriteWidth, spriteSheet.spriteHeight
+            );
         }
 
     </script>
