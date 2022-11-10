@@ -31,6 +31,14 @@
         var MAX_DISTANCE_BETWEEN_ROBOTS = 1200;
         var MAX_ACTIVE_ROBOTS = 3;
 
+        var COIN_WIDTH = 32;
+        var COIN_HEIGHT = 32;
+        var COIN_NR_ANIMATION_FRAMES = 8;
+        var COIN_ANIMATION_SPEED = 5;
+        var MIN_DISTANCE_BETWEEN_COIN = 200;
+        var MAX_DISTANCE_BETWEEN_COIN = 1500;
+        var MAX_ACTIVE_COIN = 5;
+
         var SPACE_KEYCODE = 32;
         var BACKGROUND_WIDTH = 1000;
         var gameFrameCounter = 0;
@@ -42,11 +50,6 @@
 
         var PLAY_GAME_MODE = 0;
         var GAME_OVER_GAME_MODE = 1;
-
-        /*var COIN_WIDTH = 8;
-        var COIN_HEIGHT = 8;
-        //var COIN_ANIMATION_SPEED = 3;
-        var COIN_NR_ANIMATION_FRAMES = 8;*/
 
         //SETUP
         var canvas = document.createElement('canvas');
@@ -94,8 +97,22 @@
         bush1Image.src = 'visuals/bush1.png';
         var bush2Image = new Image();
         bush2Image.src = 'visuals/bush2.png';
+
         var coin1Image = new Image();
-        coin1Image.src = 'visuals/coinW.png';
+        coin1Image.src = 'visuals/AnimatedCoin.png';
+        var coinSpriteSheet = {
+            nrFramesPerRow: 3,
+            spriteWidth: coin_WIDTH,
+            spriteHeight: coin_HEIGHT,
+            image: coin1Image
+        };
+        var coinData = [];
+        var coinCollisionRectangle = {
+            xOffset: 4,
+            yOffset: 4,
+            width: 24,
+            height: 24
+        };
 
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
@@ -110,7 +127,7 @@
         var cameraY = 0;
         var playerFrameNr = 0;
         var bushData = generateBushes();
-        //var coinData = generateCoin();
+        var coinData = generateCoin();
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
@@ -140,34 +157,21 @@
             }
             return generateBushData;
         }
-
-        /*function generateCoin() {
-            var generateCoinData = [];
-            var coinX = 0;
-            while (coinX < (2 * CANVAS_WIDTH)) {
-                var coinImage;
-                if (Math.random() >= 0.5) {
-                    coinImage = coin1Image;
-                } else {
-                    coinImage = coin1Image;
-                }
-                generateCoinData.push({
-                    x: coinX,
-                    y: 80 + Math.random() * 20,
-                    image: coinImage
-                });
-                coinX += 150 + Math.random() * 200;
-            }
-            return generateCoinData;
-        }
-
         /*
-        var coinCollisionRectangle = {
-            xOffset: 5,
-            yOffset: 5,
-            width: 10,
-            height: 10,
-        };
+                function generateCoin() {
+                    var generateCoinData = [];
+                    var coinX = 0;
+                    while (coinX < (2 * CANVAS_WIDTH)) {
+                        var coinImage = coin1Image;
+                        generateCoinData.push({
+                            x: coinX,
+                            y: 80 + Math.random() * 250,
+                            image: coinImage
+                        });
+                        coinX += 150 + Math.random() * 200;
+                    }
+                    return generateCoinData;
+                }
         */
 
         //MAIN LOOP
@@ -245,11 +249,11 @@
             }
 
             //Update the coins
-            /*for (var i = 0; i < coinData.length; i++) {
+            for (var i = 0; i < coinData.length; i++) {
                 if ((coinData[i].x - cameraX) < - CANVAS_WIDTH) {
                     coinData[i].x += (2 * CANVAS_WIDTH) + 150;
                 }
-            }*/
+            }
 
             //Check if the game is over
             if (playerHealth <= 0) {
@@ -278,7 +282,6 @@
                     robotCollisionRectangle.height
                 )) {
                     playerTouchedARobot = true;
-                    console.log('OUCH!');
                 }
                 robotData[i].x -= ROBOT_X_SPEED;
                 if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) === 0) {
@@ -336,83 +339,127 @@
             return playerOverlapsRobotOnXAxis && playerOverlapsRobotOnYAxis;
         }
 
-        //DRAWING
-        function draw() {
-            //Shake da screen
-            var shakenCameraX = cameraX;
-            var shakenCameraY = cameraY;
-
-            if (screenshake) {
-                shakenCameraX += (Math.random() - .5) * SCREENSHAKE_RADIUS;
-                shakenCameraY += (Math.random() - .5) * SCREENSHAKE_RADIUS;
+        //coins
+        var playerTouchedACoin = false;
+        for (var i = 0; i < coinData.length; i++) {
+            if (doesPlayerOverlapCoin(
+                // x,y for player
+                playerX + playerCollisionRectangle.xOffset,
+                playerY + playerCollisionRectangle.yOffset,
+                // collision rect for player
+                playerCollisionRectangle.width,
+                playerCollisionRectangle.height,
+                // x,y pos for coin
+                coinData[i].x + coinCollisionRectangle.xOffset,
+                coinData[i].y + coinCollisionRectangle.yOffset,
+                // collision rect for coin
+                coinCollisionRectangle.width,
+                coinCollisionRectangle.height
+            )) {
+                playerTouchedAcoin = true;
+                console.log('MONEY');
             }
 
-            //Da sky
-            c.fillStyle = 'LightSkyBlue';
-            c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
-
-            //Da background
-            var backgroundX = - (shakenCameraX % BACKGROUND_WIDTH);
-            c.drawImage(backgroundImage, backgroundX, -210);
-            c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210);
-
-            //Da ground
-            c.fillStyle = 'ForestGreen';
-            c.fillRect(0, GROUND_Y - 40, CANVAS_WIDTH, CANVAS_HIEGHT - GROUND_Y + 40);
-
-            //Da bush
-            for (var i = 0; i < bushData.length; i++) {
-                c.drawImage(bushData[i].image, bushData[i].x - shakenCameraX, GROUND_Y - bushData[i].y - shakenCameraY);
+            function doesPlayerOverlapCoinAlongOneAxis(playerNearX, playerFarX, CoinNearX, CoinFarX) {
+                var playerOverlapsNearCoinEdge = (playerFarX >= CoinNearX) && (playerFarX <= CoinFarX);
+                var playerOverlapsFarCoinEdge = (playerNearX >= CoinNearX) && (playerNearX <= CoinFarX);
+                var playerOverlapsEntireCoin = (playerNearX <= CoinNearX) && (playerFarX >= CoinFarX);
+                return playerOverlapsNearCoinEdge || playerOverlapsFarCoinEdge || playerOverlapsEntireCoin;
             }
 
-            //Daftpunk
-            for (var i = 0; i < robotData.length; i++) {
-                drawAnimatedSprite(robotData[i].x - shakenCameraX, robotData[i].y - shakenCameraY, robotData[i].frameNr, robotSpriteSheet);
+            function doesPlayerOverlapCoin(playerX, playerY, playerWidth, playerHeight, CoinX, CoinY, CoinWidth, CoinHeight) {
+                var playerOverlapsCoinOnXAxis = doesPlayerOverlapCoinAlongOneAxis(
+                    playerX,
+                    playerX + playerWidth,
+                    CoinX,
+                    CoinX + CoinWidth
+                );
+                var playerOverlapsCoinOnYAxis = doesPlayerOverlapCoinAlongOneAxis(
+                    playerY,
+                    playerY + playerHeight,
+                    CoinY,
+                    CoinY + CoinHeight
+                );
+                return playerOverlapsCoinOnXAxis && playerOverlapsCoinOnYAxis;
             }
 
-            //drawing mr Nano
-            drawAnimatedSprite(playerX - shakenCameraX, playerY - shakenCameraY, playerFrameNr, playerSpriteSheet);
+            //DRAWING
+            function draw() {
+                //Shake da screen
+                var shakenCameraX = cameraX;
+                var shakenCameraY = cameraY;
 
-            //printing money
-            /*for (var i = 0; i < coinData.length; i++) {
-                c.drawImage(coinData[i].image, coinData[i].x - shakenCameraX, GROUND_Y - coinData[i].y - shakenCameraY);
-            }*/
+                if (screenshake) {
+                    shakenCameraX += (Math.random() - .5) * SCREENSHAKE_RADIUS;
+                    shakenCameraY += (Math.random() - .5) * SCREENSHAKE_RADIUS;
+                }
 
-            //drawing score
-            var playerDistance = playerX / 1000;
-            c.fillStyle = 'black';
-            c.font = '48px sans-serif';
-            c.fillText(playerDistance.toFixed(0) + 'm', 20, 40);
+                //Da sky
+                c.fillStyle = 'LightSkyBlue';
+                c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
 
-            //drawing da health bar
-            c.fillStyle = 'red';
-            c.fillRect(400, 10, playerHealth / PLAYER_MAX_HEALTH * 380, 20)
-            c.strokeStyle = 'red';
-            c.strokeRect(400, 10, 380, 20);
+                //Da background
+                var backgroundX = - (shakenCameraX % BACKGROUND_WIDTH);
+                c.drawImage(backgroundImage, backgroundX, -210);
+                c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210);
 
-            //drawing da GAME OVER
-            if (gameMode == GAME_OVER_GAME_MODE) {
+                //Da ground
+                c.fillStyle = 'ForestGreen';
+                c.fillRect(0, GROUND_Y - 40, CANVAS_WIDTH, CANVAS_HIEGHT - GROUND_Y + 40);
+
+                //Da bush
+                for (var i = 0; i < bushData.length; i++) {
+                    c.drawImage(bushData[i].image, bushData[i].x - shakenCameraX, GROUND_Y - bushData[i].y - shakenCameraY);
+                }
+
+                //printing money
+                for (var i = 0; i < coinData.length; i++) {
+                    c.drawImage(coinData[i].image, coinData[i].x - shakenCameraX, GROUND_Y - coinData[i].y - shakenCameraY);
+                }
+
+                //Daftpunk
+                for (var i = 0; i < robotData.length; i++) {
+                    drawAnimatedSprite(robotData[i].x - shakenCameraX, robotData[i].y - shakenCameraY, robotData[i].frameNr, robotSpriteSheet);
+                }
+
+                //drawing mr Nano
+                drawAnimatedSprite(playerX - shakenCameraX, playerY - shakenCameraY, playerFrameNr, playerSpriteSheet);
+
+                //drawing score
+                var playerDistance = playerX / 1000;
                 c.fillStyle = 'black';
-                c.font = '96px sans-serif';
-                c.fillText('GAME OVER', 120, 300);
+                c.font = '48px sans-serif';
+                c.fillText(playerDistance.toFixed(0) + 'm', 20, 40);
+
+                //drawing da health bar
+                c.fillStyle = 'red';
+                c.fillRect(400, 10, playerHealth / PLAYER_MAX_HEALTH * 380, 20)
+                c.strokeStyle = 'red';
+                c.strokeRect(400, 10, 380, 20);
+
+                //drawing da GAME OVER
+                if (gameMode == GAME_OVER_GAME_MODE) {
+                    c.fillStyle = 'black';
+                    c.font = '96px sans-serif';
+                    c.fillText('GAME OVER', 120, 300);
+                }
+            }
+
+            //spite animator
+            function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
+                var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
+                var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
+                var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
+                var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
+                c.drawImage(
+                    spriteSheet.image,
+                    spriteSheetX, spriteSheetY,
+                    spriteSheet.spriteWidth, spriteSheet.spriteHeight,
+                    screenX, screenY,
+                    spriteSheet.spriteWidth, spriteSheet.spriteHeight
+                );
             }
         }
-
-        //spite animator
-        function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
-            var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
-            var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
-            var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
-            var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
-            c.drawImage(
-                spriteSheet.image,
-                spriteSheetX, spriteSheetY,
-                spriteSheet.spriteWidth, spriteSheet.spriteHeight,
-                screenX, screenY,
-                spriteSheet.spriteWidth, spriteSheet.spriteHeight
-            );
-        }
-
     </script>
 </body>
 
