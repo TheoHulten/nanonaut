@@ -95,7 +95,7 @@
         var bush2Image = new Image();
         bush2Image.src = 'visuals/bush2.png';
         var coin1Image = new Image();
-        coin1Image.src = 'visuals/coin.png';
+        coin1Image.src = 'visuals/coinW.png';
 
         var backgroundImage = new Image();
         backgroundImage.src = 'visuals/background.png';
@@ -110,7 +110,7 @@
         var cameraY = 0;
         var playerFrameNr = 0;
         var bushData = generateBushes();
-        var coinData = generateCoin();
+        //var coinData = generateCoin();
 
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
@@ -141,7 +141,7 @@
             return generateBushData;
         }
 
-        function generateCoin() {
+        /*function generateCoin() {
             var generateCoinData = [];
             var coinX = 0;
             while (coinX < (2 * CANVAS_WIDTH)) {
@@ -245,11 +245,11 @@
             }
 
             //Update the coins
-            for (var i = 0; i < coinData.length; i++) {
+            /*for (var i = 0; i < coinData.length; i++) {
                 if ((coinData[i].x - cameraX) < - CANVAS_WIDTH) {
                     coinData[i].x += (2 * CANVAS_WIDTH) + 150;
                 }
-            }
+            }*/
 
             //Check if the game is over
             if (playerHealth <= 0) {
@@ -374,9 +374,9 @@
             drawAnimatedSprite(playerX - shakenCameraX, playerY - shakenCameraY, playerFrameNr, playerSpriteSheet);
 
             //printing money
-            for (var i = 0; i < coinData.length; i++) {
+            /*for (var i = 0; i < coinData.length; i++) {
                 c.drawImage(coinData[i].image, coinData[i].x - shakenCameraX, GROUND_Y - coinData[i].y - shakenCameraY);
-            }
+            }*/
 
             //drawing score
             var playerDistance = playerX / 1000;
